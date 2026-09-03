@@ -16,6 +16,11 @@ class optical:
 		except:
 			raise RuntimeError("No optical data provided")
 
+		df_file_surface = yaml_data.get('df_file_surface')
+		if df_file_surface is not None:
+			self.df_file_surface = os.path.join(basedir, df_file_surface)
+			self._load_surface_df_file()
+
 		self._load_df_file()
 
 	def get_elf(self):
@@ -30,6 +35,21 @@ class optical:
 			return np.copy(self.outer_shells.magnitude) * self.outer_shells.units
 		else:
 			return np.array([])*units.eV
+
+	def get_surface_elf(self):
+		if not hasattr(self, 'surface_elf_data'):
+			return np.array([]) * units.dimensionless
+		return np.copy(self.surface_elf_data) * units.dimensionless
+
+	def get_surface_excitation_parameter(self):
+		if not hasattr(self, 'surface_excitation_parameter'):
+			return np.array([0]) * units.dimensionless
+		return np.array([self.surface_excitation_parameter.magnitude]) * units.dimensionless
+
+	def get_surface_energy(self):
+		if not hasattr(self, 'surface_energy_data'):
+			return np.array([])*units.eV
+		return np.copy(self.surface_energy_data)
 
 	def get_min_energy(self):
 		"""Get lowest energy tabulated."""
@@ -82,3 +102,13 @@ class optical:
 			data = np.loadtxt(file, unpack=True)
 			self.energy_data = data[0,:-1] * units.eV
 			self.elf_data = data[1,:-1]
+
+	def _load_surface_df_file(self):
+		with open(self.df_file_surface) as file:
+			self.surface_excitation_parameter = float(file.readline()) * units.dimensionless
+			data = np.loadtxt(file, unpack=True)
+		if data.ndim != 2 or data.shape[0] != 2:
+			raise RuntimeError("Surface optical data must contain two columns")
+
+		self.surface_energy_data = data[0] * units.eV
+		self.surface_elf_data = data[1]

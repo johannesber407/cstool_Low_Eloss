@@ -10,7 +10,8 @@ band_structure:
     work_function:   5.38 eV
 
 optical:
-    df_file:         elf/df_Au.dat
+    df_file:         elf/df_Au_Palik1985.dat
+    df_file_surface: elf_surface/df_Au_surface_Palik1985.dat
 
 phonon:
     model:           dual

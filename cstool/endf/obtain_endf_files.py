@@ -1,8 +1,11 @@
 import os
 import json
+from pathlib import Path
 from urllib.request import urlopen
 from hashlib import sha1
-from pkg_resources import resource_string, resource_filename
+
+
+_DATA_DIR = Path(__file__).resolve().parent.parent / 'data'
 
 def download_file(source):
 	"""Download resource files, and verify the hash.
@@ -50,8 +53,8 @@ def obtain_endf_files():
 
 	If the file is corrupted and cannot be downloaded, throws an exception.
 	"""
-	sources = json.loads(resource_string(__name__, '../data/endf_sources.json').decode("utf-8"))
-	endf_dir = resource_filename(__name__, '../data/endf_data')
+	sources = json.loads((_DATA_DIR / 'endf_sources.json').read_text())
+	endf_dir = _DATA_DIR / 'endf_data'
 
 	os.makedirs(endf_dir, exist_ok=True)
 	for name, source in sources.items():

@@ -108,6 +108,18 @@ def compile_ionization(outfile, material_params,
 	group.add_dataset("binding_icdf", icdf, ("energy", "loss_frac", None), 'eV')
 
 
+def compile_surface_excitation(outfile, material_params):
+	energy = material_params.optical.get_surface_energy()
+	if len(energy) == 0:
+		return
+
+	group = outfile.create_group("/surface_excitation")
+	group.add_dataset("parameter",
+		material_params.optical.get_surface_excitation_parameter(), None, '')
+	group.add_scale("energy", energy, 'eV')
+	group.add_dataset("elf", material_params.optical.get_surface_elf(), ("energy",), '')
+
+
 
 def main():
 	print("This is cstool version {}".format(cst.__version__))
@@ -147,6 +159,8 @@ def main():
 			'g')
 		if s.band_structure.model == 'insulator' or s.band_structure.model == 'semiconductor':
 			outfile.set_property('band_gap', s.band_structure.band_gap, 'eV')
+
+		compile_surface_excitation(outfile, s)
 
 
 		# Kieft elastic
