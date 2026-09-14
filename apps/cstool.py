@@ -13,6 +13,7 @@ from cstool.endf import compile_electronionization_icdf, compile_photoionization
 
 import numpy as np
 import argparse
+import os
 
 
 
@@ -67,6 +68,13 @@ def compile_kieft_inelastic(outfile, material_params, K, P):
 	group.add_dataset("imfp", imfp, ("energy",), 'nm^-1')
 	group.add_dataset("w0_icdf", icdf, ("energy", None), 'eV')
 
+def compile_reels(outfile, material_params):
+	print("# Writing REELS bulk energy-loss data.")
+
+	group = outfile.create_group("/REELS")
+	group.add_scale("omega", material_params.reels.get_omega(), 'eV')
+	group.add_dataset("w_b", material_params.reels.get_w_b(), ("omega",), '')
+
 def compile_kieft_ionization(outfile, material_params, E, P):
 	print("# Computing Kieft ionization energy probabilities")
 	icdf = compile_photoionization_icdf(material_params, E, P)
@@ -109,15 +117,19 @@ def compile_ionization(outfile, material_params,
 
 
 def compile_surface_excitation(outfile, material_params):
-	energy = material_params.optical.get_surface_energy()
+	surface_data = material_params.optical
+	energy = surface_data.get_surface_energy()
+	if len(energy) == 0 and hasattr(material_params, 'reels'):
+		surface_data = material_params.reels
+		energy = surface_data.get_surface_energy()
 	if len(energy) == 0:
 		return
 
 	group = outfile.create_group("/surface_excitation")
 	group.add_dataset("parameter",
-		material_params.optical.get_surface_excitation_parameter(), None, '')
+		surface_data.get_surface_excitation_parameter(), None, '')
 	group.add_scale("energy", energy, 'eV')
-	group.add_dataset("elf", material_params.optical.get_surface_elf(), ("energy",), '')
+	group.add_dataset("elf", surface_data.get_surface_elf(), ("energy",), '')
 
 
 
@@ -146,7 +158,8 @@ def main():
 	#
 	# Compute cross sections and write to file
 	#
-	with datafile("{}.mat".format(s.name), 'w') as outfile:
+	output_file = os.path.splitext(args.material_file)[0] + ".mat"
+	with datafile(output_file, 'w') as outfile:
 		outfile.set_property('cstool_version', cst.__version__)
 		outfile.set_property('name', s.name)
 		outfile.set_property('conductor_type', s.band_structure.model)
@@ -168,13 +181,16 @@ def main():
 			np.geomspace(1, max_energy.to(units.eV).magnitude, 128) * units.eV,
 			np.linspace(0.0, 1.0, 512))
 
-		# Kieft inelastic
-		compile_kieft_inelastic(outfile, s,
-			np.geomspace(
-				s.band_structure.get_fermi().to(units.eV).magnitude + .1,
-				max_energy.to(units.eV).magnitude,
-				128) * units.eV,
-			np.linspace(0.0, 1.0, 512))
+		# Inelastic energy-loss data
+		if hasattr(s, 'reels'):
+			compile_reels(outfile, s)
+		else:
+			compile_kieft_inelastic(outfile, s,
+				np.geomspace(
+					s.band_structure.get_fermi().to(units.eV).magnitude + .1,
+					max_energy.to(units.eV).magnitude,
+					128) * units.eV,
+				np.linspace(0.0, 1.0, 512))
 
 		# Kieft ionization
 		compile_kieft_ionization(outfile, s,
