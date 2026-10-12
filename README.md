@@ -8,4 +8,5 @@ package can be found in the [documentation](https://nebula-simulator.github.io).
 # Adjustments
 Features that I plan to add to cstool:
 - Add files describing the surface excitation of materials; read these files into the .mat file, so they can be processed by Nebula. (done)
-- Adding additianal datasets of the ELF to choose from (for example from https://doi.org/10.1063/1.3243762)
+- add Temperature into the .mat file, so that doppler broadening in elastic scattering can be handeled correctly (see for example: D, Varga et al., Surf. Interface Anal. 2001; 31: 1019–1026)
+- Adding additianal datasets of the ELF to choose from (Maybe at some point in the future)(for example from https://doi.org/10.1063/1.3243762)
