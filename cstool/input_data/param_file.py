@@ -5,7 +5,6 @@ from cstool.common import units
 from .element import element
 from .band_structure import band_structure
 from .optical import optical
-from .REELS import REELS as reels
 from .phonon import phonon
 
 class param_file:
@@ -34,8 +33,6 @@ class param_file:
 			self.density = units(yaml_data['density'])
 			self.elements = [element(*el) for el in yaml_data['elements'].items()]
 			self.band_structure = band_structure(yaml_data['band_structure'])
-			if 'REELS' in yaml_data:
-				self.reels = reels(yaml_data['REELS'], basedir)
 			self.optical = optical(yaml_data['optical'], basedir)
 			self.phonon = phonon(yaml_data['phonon'], self)
 		except KeyError as ke:

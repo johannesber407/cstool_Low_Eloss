@@ -14,8 +14,7 @@ def interp_ll(x, y, left=None, right=None):
 	y *= units.dimensionless
 
 	x_log_steps = np.log(x[1:]/x[:-1])
-	out=np.zeros_like(x)
-	log_y = np.log(y.magnitude, out=out, where=y.magnitude>0)
+	log_y = np.log(y.magnitude, where=y.magnitude>0)
 	log_y[y.magnitude <= 0] = -np.inf
 
 	def f(xp):
