@@ -1,5 +1,6 @@
 name:                gold
 density:             19.30 g/cm³
+temperature:         293 K
 
 elements:
     Au: { count: 1, Z: 79, M: 196.97 g/mol }

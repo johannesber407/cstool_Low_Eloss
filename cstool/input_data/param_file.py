@@ -6,6 +6,7 @@ from .element import element
 from .band_structure import band_structure
 from .optical import optical
 from .phonon import phonon
+from .helpers import load_quantity
 
 class param_file:
 	"""Top-level file parameters class.
@@ -31,6 +32,9 @@ class param_file:
 		try:
 			self.name = yaml_data.get('name')
 			self.density = units(yaml_data['density'])
+			self.temperature = load_quantity(yaml_data, 'temperature', units.K, True)
+			if self.temperature is None:
+				self.temperature = 293 * units.K
 			self.elements = [element(*el) for el in yaml_data['elements'].items()]
 			self.band_structure = band_structure(yaml_data['band_structure'])
 			self.optical = optical(yaml_data['optical'], basedir)

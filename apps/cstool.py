@@ -120,6 +120,13 @@ def compile_surface_excitation(outfile, material_params):
 	group.add_dataset("elf", material_params.optical.get_surface_elf(), ("energy",), '')
 
 
+def save_temperature(outfile, material_params):
+	#print(material_params.temperature)
+	group = outfile.create_group("/temperature")
+	temperature=np.array([material_params.temperature.magnitude]) * units.K
+	group.add_dataset("temperature", temperature, None, 'K')
+
+
 
 def main():
 	print("This is cstool version {}".format(cst.__version__))
@@ -149,6 +156,7 @@ def main():
 	with datafile("{}.mat".format(s.name), 'w') as outfile:
 		outfile.set_property('cstool_version', cst.__version__)
 		outfile.set_property('name', s.name)
+		outfile.set_property('temperature', s.temperature, 'K')
 		outfile.set_property('conductor_type', s.band_structure.model)
 		outfile.set_property('fermi', s.band_structure.get_fermi(), 'eV')
 		outfile.set_property('barrier', s.band_structure.get_barrier(), 'eV')
@@ -160,6 +168,7 @@ def main():
 		if s.band_structure.model == 'insulator' or s.band_structure.model == 'semiconductor':
 			outfile.set_property('band_gap', s.band_structure.band_gap, 'eV')
 
+		save_temperature(outfile, s)
 		compile_surface_excitation(outfile, s)
 
 
